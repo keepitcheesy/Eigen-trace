@@ -7,7 +7,6 @@ Provides tokenizer abstraction with:
 """
 
 from typing import List, Optional
-import sys
 
 
 class BaseTokenizer:
@@ -29,15 +28,16 @@ class WhitespaceTokenizer(BaseTokenizer):
 class TikTokenTokenizer(BaseTokenizer):
     """TikToken-based tokenizer (requires tiktoken package)."""
     
-    def __init__(self, model: str = "gpt2"):
+    def __init__(self, encoding_name: str = "gpt2"):
         """Initialize TikToken tokenizer.
         
         Args:
-            model: Model name for tiktoken encoding (default: gpt2)
+            encoding_name: Tiktoken encoding name (default: gpt2)
+                          Common options: gpt2, cl100k_base (GPT-4), p50k_base
         """
         try:
             import tiktoken
-            self.encoding = tiktoken.get_encoding(model)
+            self.encoding = tiktoken.get_encoding(encoding_name)
         except ImportError:
             raise ImportError(
                 "tiktoken is not installed. Please install it with:\n"
@@ -65,6 +65,7 @@ class SentencePieceTokenizer(BaseTokenizer):
         """
         try:
             import sentencepiece as spm
+            import warnings
             if model_path:
                 self.sp = spm.SentencePieceProcessor()
                 self.sp.load(model_path)
@@ -72,10 +73,10 @@ class SentencePieceTokenizer(BaseTokenizer):
                 # Use a default/mock tokenizer for basic functionality
                 # In production, users should provide a model path
                 self.sp = None
-                print(
-                    "Warning: No SentencePiece model provided. "
+                warnings.warn(
+                    "No SentencePiece model provided. "
                     "Using basic whitespace tokenization as fallback.",
-                    file=sys.stderr
+                    UserWarning
                 )
         except ImportError:
             raise ImportError(

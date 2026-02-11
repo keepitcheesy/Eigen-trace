@@ -51,7 +51,7 @@ class TestGetTokenizer:
     
     def test_tiktoken_not_installed(self):
         """Test tiktoken error when not installed."""
-        # This will fail if tiktoken IS installed
+        # This test is skipped if tiktoken IS installed
         try:
             import tiktoken
             pytest.skip("tiktoken is installed, skipping error test")
@@ -61,7 +61,7 @@ class TestGetTokenizer:
     
     def test_sentencepiece_not_installed(self):
         """Test sentencepiece error when not installed."""
-        # This will fail if sentencepiece IS installed
+        # This test is skipped if sentencepiece IS installed
         try:
             import sentencepiece
             pytest.skip("sentencepiece is installed, skipping error test")
