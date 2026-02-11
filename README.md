@@ -49,10 +49,11 @@ Optional dependencies for integrations:
 
 ## Debugging & Example Files
 
-This repo includes a small example input file and a debug helper:
+This repo includes a small example input file and debug helpers:
 
 - `outputs.jsonl` — sample input data (uses `prediction` and `truth`)
 - `debug_signal.py` — prints basic stats on the encoded signal to help explain zero/near‑zero scores
+- `scripts/escalate.py` — optional helper to filter results for escalation to an external judge
 
 ### Example input format
 
@@ -71,6 +72,29 @@ If the standard deviation is near zero, the signal is flat and instability score
 ```bash
 python -m logoslabs.cli outputs.jsonl results.jsonl --threshold 0.05 --summary
 ```
+
+The CLI writes a `results.jsonl` file containing the original fields plus `instability_score` and `passed_threshold`:
+
+```jsonl
+{"id":"1","prediction":"...","truth":"...","instability_score":0.0466,"passed_threshold":true}
+{"id":"2","prediction":"...","truth":"...","instability_score":0.0548,"passed_threshold":false}
+```
+
+### Optional GPT-4 Escalation
+
+For items that fail the threshold or require additional review, use `scripts/escalate.py` to generate a JSONL queue for your external judge pipeline (e.g., GPT-4, human review):
+
+**Default behavior** (uses `passed_threshold` field):
+```bash
+python scripts/escalate.py results.jsonl > escalate_queue.jsonl
+```
+
+**Custom threshold** (escalates if `instability_score > threshold`):
+```bash
+python scripts/escalate.py results.jsonl --threshold 0.048 > escalate_queue.jsonl
+```
+
+This outputs JSONL lines to stdout for only the items that should be escalated. The escalation step is **completely optional**—EigenTrace provides offline filtering, and you can integrate escalation into your existing judge pipeline as needed.
 ### Command-Line Interface
 
 Basic usage:

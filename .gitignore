@@ -66,3 +66,7 @@ Thumbs.db
 # Temporary files
 tmp/
 *.tmp
+
+# Generated output files
+results.jsonl
+escalate_queue.jsonl
