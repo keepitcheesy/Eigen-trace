@@ -2,6 +2,7 @@
 Command-line interface for LogosLabs AVP.
 
 Provides a CLI for pre-filtering LLM outputs using LogosLoss-based analysis.
+Supports optional token-level heuristics and multiple tokenizers.
 """
 
 import argparse
@@ -10,6 +11,7 @@ import json
 from typing import Optional
 
 from .avp import AVPProcessor, load_jsonl, save_jsonl
+from .tokenizers import get_tokenizer
 
 
 def main(argv: Optional[list] = None) -> int:
@@ -83,11 +85,38 @@ def main(argv: Optional[list] = None) -> int:
         help="Enable belief streams (experimental, currently not implemented)",
     )
     
+    parser.add_argument(
+        "--heuristics",
+        action="store_true",
+        help="Enable token-level heuristic feature computation (opt-in)",
+    )
+    
+    parser.add_argument(
+        "--tokenizer",
+        type=str,
+        default="whitespace",
+        choices=["whitespace", "tiktoken", "sentencepiece"],
+        help="Tokenizer to use for heuristics (default: whitespace)",
+    )
+    
     args = parser.parse_args(argv)
     
     # Validate arguments
     if args.enable_belief_streams:
         print("Warning: Belief streams not yet implemented, using structural-only mode", file=sys.stderr)
+    
+    # Initialize tokenizer if heuristics are enabled
+    tokenizer = None
+    if args.heuristics:
+        try:
+            tokenizer = get_tokenizer(args.tokenizer)
+            print(f"Using tokenizer: {args.tokenizer}", file=sys.stderr)
+        except ImportError as e:
+            print(f"Error: {e}", file=sys.stderr)
+            return 1
+        except Exception as e:
+            print(f"Error initializing tokenizer: {e}", file=sys.stderr)
+            return 1
     
     try:
         # Load input
@@ -103,6 +132,8 @@ def main(argv: Optional[list] = None) -> int:
             max_length=args.max_length,
             structural_only=not args.enable_belief_streams,
             deterministic=not args.no_deterministic,
+            enable_heuristics=args.heuristics,
+            tokenizer=tokenizer,
         )
         
         # Process batch
