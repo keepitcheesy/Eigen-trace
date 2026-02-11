@@ -6,6 +6,7 @@ This module provides functionality for:
 - Computing instability scores using LogosLossV4
 - Threshold gating
 - Batch processing with FFT spectral+phase parity
+- Optional token-level heuristics
 """
 
 import json
@@ -14,6 +15,8 @@ import torch
 import numpy as np
 
 from .logosloss import LogosLossV4
+from .tokenizers import BaseTokenizer, get_tokenizer
+from .heuristics import compute_all_heuristics
 
 
 def encode_text_to_tensor(text: str, max_length: int = 512) -> torch.Tensor:
@@ -83,6 +86,7 @@ class AVPProcessor:
     - Optional belief streams (future extension)
     - Batch processing with FFT spectral+phase parity
     - Threshold gating
+    - Optional token-level heuristics
     """
     
     def __init__(
@@ -93,6 +97,8 @@ class AVPProcessor:
         max_length: int = 512,
         structural_only: bool = True,
         deterministic: bool = True,
+        enable_heuristics: bool = False,
+        tokenizer: Optional[BaseTokenizer] = None,
     ):
         """
         Initialize AVP processor.
@@ -104,10 +110,14 @@ class AVPProcessor:
             max_length: Maximum sequence length for encoding
             structural_only: Use only structural analysis (default True)
             deterministic: Ensure deterministic behavior (default True)
+            enable_heuristics: Enable token-level heuristics computation (default False)
+            tokenizer: Tokenizer for heuristics (default: whitespace)
         """
         self.threshold = threshold
         self.max_length = max_length
         self.structural_only = structural_only
+        self.enable_heuristics = enable_heuristics
+        self.tokenizer = tokenizer if tokenizer is not None else get_tokenizer("whitespace")
         
         # Set random seed for determinism
         if deterministic:
@@ -142,13 +152,19 @@ class AVPProcessor:
             self.max_length,
         )
         
-        # Check threshold
+        # Check threshold (based on LogosLossV4 only)
         passed = score <= self.threshold
         
         # Add score to item
         result = item.copy()
         result["instability_score"] = float(score)
         result["passed_threshold"] = passed
+        
+        # Optionally compute heuristics
+        if self.enable_heuristics:
+            tokens = self.tokenizer.tokenize(pred_text)
+            heuristics = compute_all_heuristics(tokens)
+            result.update(heuristics)
         
         return result, passed
     

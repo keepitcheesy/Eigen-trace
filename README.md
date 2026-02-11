@@ -194,6 +194,8 @@ Output JSONL includes the original fields plus scoring information:
 - `--summary`: Print summary statistics to stdout
 - `--no-deterministic`: Disable deterministic behavior
 - `--enable-belief-streams`: Enable belief streams (experimental, not yet implemented)
+- `--heuristics`: Enable token-level heuristic feature computation (opt-in)
+- `--tokenizer`: Tokenizer to use for heuristics - `whitespace` (default), `tiktoken`, `sentencepiece`
 
 ### Python API
 
@@ -235,6 +237,95 @@ loss_fn = LogosLossV4(
 pred = torch.randn(4, 2, 128)  # (batch, channels, sequence)
 truth = torch.randn(4, 2, 128)
 loss = loss_fn(pred, truth)
+```
+
+## Token-Level Heuristics (Opt-In)
+
+EigenTrace now supports optional token-level heuristic features that can provide additional signals about text quality. These features are **opt-in** and disabled by default to maintain backward compatibility.
+
+### Heuristic Features
+
+When `--heuristics` is enabled, the following additional fields are computed and added to the output:
+
+1. **`repetition_score`**: Detects local n-gram repetition patterns using sliding windows (size 5). Measures how often the same sequence of tokens appears multiple times. Higher values indicate more repetition.
+
+2. **`rolling_var_score`**: Computes the variance of token lengths across rolling windows (size 32). Measures diversity in token characteristics. The raw variance is reported (typically 0-100 for normal text).
+
+3. **`ttr_score`**: Type-Token Ratio within windows (size 50). Measures vocabulary diversity - the ratio of unique tokens to total tokens. The score is inverted so that higher values indicate more repetition (lower diversity).
+
+4. **`heuristics_score`**: A weighted aggregate of all heuristics (40% repetition + 30% variance + 30% TTR). Provides a single score combining all heuristic signals.
+
+**Important**: The `passed_threshold` field remains based **solely on LogosLossV4** instability score. Heuristics are emitted as additional information but do not affect the default pass/fail gating.
+
+### Tokenizer Support
+
+Heuristics require tokenization. Three tokenizers are supported:
+
+- **`whitespace`** (default): No dependencies, splits on whitespace
+- **`tiktoken`**: Requires `pip install tiktoken` - uses GPT-style tokenization
+- **`sentencepiece`**: Requires `pip install sentencepiece` - uses SentencePiece tokenization
+
+If you select `tiktoken` or `sentencepiece` without installing the package, you'll receive a clear error message with installation instructions.
+
+### Usage Examples
+
+**Basic usage with heuristics (whitespace tokenizer):**
+```bash
+logoslabs input.jsonl output.jsonl --heuristics
+```
+
+**With custom tokenizer:**
+```bash
+# Using tiktoken (requires: pip install tiktoken)
+logoslabs input.jsonl output.jsonl --heuristics --tokenizer tiktoken
+
+# Using sentencepiece (requires: pip install sentencepiece)
+logoslabs input.jsonl output.jsonl --heuristics --tokenizer sentencepiece
+```
+
+**With all options:**
+```bash
+logoslabs input.jsonl output.jsonl \
+  --threshold 0.5 \
+  --heuristics \
+  --tokenizer whitespace \
+  --summary
+```
+
+### Example Output with Heuristics
+
+Without `--heuristics` (default):
+```jsonl
+{"id":"1","prediction":"...","truth":"...","instability_score":0.0466,"passed_threshold":true}
+```
+
+With `--heuristics`:
+```jsonl
+{"id":"1","prediction":"...","truth":"...","instability_score":0.0466,"passed_threshold":true,"repetition_score":0.0,"rolling_var_score":12.0,"ttr_score":0.0,"heuristics_score":0.264}
+```
+
+### Python API with Heuristics
+
+```python
+from logoslabs.avp import AVPProcessor
+from logoslabs.tokenizers import get_tokenizer
+
+# Initialize with heuristics enabled
+tokenizer = get_tokenizer("whitespace")
+processor = AVPProcessor(
+    threshold=1.0,
+    enable_heuristics=True,
+    tokenizer=tokenizer,
+)
+
+# Process items - output will include heuristic fields
+items = [
+    {"prediction": "test prediction text", "truth": "ground truth"},
+]
+results = processor.process_batch(items)
+
+# Results include: repetition_score, rolling_var_score, ttr_score, heuristics_score
+print(results[0])
 ```
 
 ## Framework Integrations

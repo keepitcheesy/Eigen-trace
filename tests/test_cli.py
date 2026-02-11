@@ -116,3 +116,112 @@ class TestCLI:
             main(["--help"])
         
         assert exc_info.value.code == 0
+    
+    def test_cli_with_heuristics(self):
+        """Test CLI with heuristics enabled."""
+        # Create test input file
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
+            f.write('{"prediction": "test one two three", "truth": "truth one two three"}\n')
+            input_file = f.name
+        
+        with tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False) as f:
+            output_file = f.name
+        
+        try:
+            # Run CLI with heuristics
+            result = main([input_file, output_file, "--heuristics"])
+            
+            assert result == 0
+            
+            # Check output has heuristic fields
+            with open(output_file, "r") as f:
+                line = f.readline()
+                item = json.loads(line)
+                assert "instability_score" in item
+                assert "passed_threshold" in item
+                assert "repetition_score" in item
+                assert "rolling_var_score" in item
+                assert "ttr_score" in item
+                assert "heuristics_score" in item
+                
+        finally:
+            os.unlink(input_file)
+            if os.path.exists(output_file):
+                os.unlink(output_file)
+    
+    def test_cli_without_heuristics(self):
+        """Test CLI without heuristics (default)."""
+        # Create test input file
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
+            f.write('{"prediction": "test", "truth": "truth"}\n')
+            input_file = f.name
+        
+        with tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False) as f:
+            output_file = f.name
+        
+        try:
+            # Run CLI without heuristics (default)
+            result = main([input_file, output_file])
+            
+            assert result == 0
+            
+            # Check output does NOT have heuristic fields
+            with open(output_file, "r") as f:
+                line = f.readline()
+                item = json.loads(line)
+                assert "instability_score" in item
+                assert "passed_threshold" in item
+                assert "repetition_score" not in item
+                assert "rolling_var_score" not in item
+                assert "ttr_score" not in item
+                assert "heuristics_score" not in item
+                
+        finally:
+            os.unlink(input_file)
+            if os.path.exists(output_file):
+                os.unlink(output_file)
+    
+    def test_cli_tokenizer_whitespace(self):
+        """Test CLI with whitespace tokenizer."""
+        # Create test input file
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
+            f.write('{"prediction": "test", "truth": "truth"}\n')
+            input_file = f.name
+        
+        with tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False) as f:
+            output_file = f.name
+        
+        try:
+            # Run CLI with whitespace tokenizer
+            result = main([input_file, output_file, "--heuristics", "--tokenizer", "whitespace"])
+            
+            assert result == 0
+                
+        finally:
+            os.unlink(input_file)
+            if os.path.exists(output_file):
+                os.unlink(output_file)
+    
+    def test_cli_tokenizer_tiktoken_error(self):
+        """Test CLI with tiktoken when not installed."""
+        # Create test input file
+        with tempfile.NamedTemporaryFile(mode="w", suffix=".jsonl", delete=False) as f:
+            f.write('{"prediction": "test", "truth": "truth"}\n')
+            input_file = f.name
+        
+        with tempfile.NamedTemporaryFile(suffix=".jsonl", delete=False) as f:
+            output_file = f.name
+        
+        try:
+            # Try to use tiktoken (should fail if not installed)
+            try:
+                import tiktoken
+                pytest.skip("tiktoken is installed, skipping error test")
+            except ImportError:
+                result = main([input_file, output_file, "--heuristics", "--tokenizer", "tiktoken"])
+                assert result == 1
+                
+        finally:
+            os.unlink(input_file)
+            if os.path.exists(output_file):
+                os.unlink(output_file)
