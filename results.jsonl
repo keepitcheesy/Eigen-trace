@@ -1,2 +1,0 @@
-{"id": "1", "prediction": "Photosynthesis is how plants convert light into energy.", "truth": "Photosynthesis converts light energy into chemical energy in plants.", "instability_score": 0.046558596193790436, "passed_threshold": true}
-{"id": "2", "prediction": "Photosynthesis is when plants teleport nutrients across space.", "truth": "Photosynthesis converts light energy into chemical energy in plants.", "instability_score": 0.05480964854359627, "passed_threshold": false}
