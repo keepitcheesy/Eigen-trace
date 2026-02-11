@@ -47,6 +47,30 @@ Optional dependencies for integrations:
 
 ## Usage
 
+## Debugging & Example Files
+
+This repo includes a small example input file and a debug helper:
+
+- `outputs.jsonl` — sample input data (uses `prediction` and `truth`)
+- `debug_signal.py` — prints basic stats on the encoded signal to help explain zero/near‑zero scores
+
+### Example input format
+
+```jsonl
+{"id":"1","prediction":"Photosynthesis is how plants convert light into energy.","truth":"Photosynthesis converts light energy into chemical energy in plants."}
+{"id":"2","prediction":"Photosynthesis is when plants teleport nutrients across space.","truth":"Photosynthesis converts light energy into chemical energy in plants."}
+```
+
+### Debug signal stats
+```bash
+python debug_signal.py
+```
+If the standard deviation is near zero, the signal is flat and instability scores will be near zero.
+
+### Run evaluation
+```bash
+python -m logoslabs.cli outputs.jsonl results.jsonl --threshold 0.05 --summary
+```
 ### Command-Line Interface
 
 Basic usage:
