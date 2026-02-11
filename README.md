@@ -1,6 +1,59 @@
 # EigenTrace
 
-Adversarial Validation Pipeline (AVP) for pre-filtering LLM outputs. It provides deterministic, offline structural analysis of text using FFT spectral and phase parity metrics.
+EigenTrace measures whether the model’s output is internally stable — not whether it agrees with another model. It's a deterministic structural auditor for LLM outputs.
+It replaces LLM-as-a-Judge for first-pass filtering.
+It runs in milliseconds, costs nothing per token, and works offline.
+It measures entropy bursts and phase instability instead of asking another model for opinions.
+
+It detects:
+Confident nonsense (smooth but semantically wrong)
+High-entropy hallucination bursts
+Structural collapse
+Overfit jitter
+Degenerate loops
+
+It does not judge content.
+It measures coherence stability.
+total = MSE(time) 
+      + α · spectral_error 
+      + β · phase_error
+Time = “does it resemble normal language flow?”
+Spectral = “does it explode in entropy?”
+Phase = “does structure stay coherent?”
+
+1. Convert text into a numeric waveform. 
+2. Compare waveform to stable structural priors.
+3. Penalize noise spikes (entropy bursts).
+4. Penalize phase drift (structural inconsistency).
+5. Output a confidence score.
+
+LLM-as-a-Judge:
+Requires second model
+Doubles inference cost
+Adds network latency
+Adds carbon cost
+
+EigenTrace:
+Pure Python
+NumPy FFT
+O(n log n)
+Milliseconds
+Deterministic
+Offline
+
+Privacy:
+LLM peer review means:
+User data → external API → second model → stored somewhere
+
+EigenTrace:
+User data → local math → done
+
+Useful For:
+Healthcare
+Finance
+Defense
+Enterprise compliance
+Censorship-averse users
 
 ## Features
 
