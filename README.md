@@ -10,6 +10,7 @@ LogosLabs is a LogosLoss-based Adversarial Validation Pipeline (AVP) for pre-fil
 - **Threshold Gating**: Filter outputs based on configurable instability thresholds
 - **Summary Statistics**: Generate comprehensive summary reports
 - **CLI Interface**: Easy-to-use command-line interface
+- **Framework Integrations**: Easy integration with LangChain, LlamaIndex, and ZenML
 
 ## Installation
 
@@ -21,11 +22,28 @@ cd Eigen-trace
 pip install -e .
 ```
 
+### With Framework Integrations
+
+```bash
+# Install with all integrations
+pip install -e ".[all]"
+
+# Or install specific integrations
+pip install -e ".[langchain]"  # LangChain integration
+pip install -e ".[llamaindex]"  # LlamaIndex integration
+pip install -e ".[zenml]"       # ZenML integration
+```
+
 ### Dependencies
 
 - Python >= 3.8
 - PyTorch >= 2.0.0
 - NumPy >= 1.20.0
+
+Optional dependencies for integrations:
+- LangChain >= 0.0.200
+- LlamaIndex >= 0.9.0
+- ZenML >= 0.40.0
 
 ## Usage
 
@@ -117,6 +135,59 @@ pred = torch.randn(4, 2, 128)  # (batch, channels, sequence)
 truth = torch.randn(4, 2, 128)
 loss = loss_fn(pred, truth)
 ```
+
+## Framework Integrations
+
+LogosLabs integrates seamlessly with popular ML and LLM frameworks.
+
+### LangChain Integration
+
+```python
+from langchain.llms import OpenAI
+from logoslabs.integrations.langchain import LogosLabsChain
+
+# Create chain with built-in validation
+chain = LogosLabsChain.from_llm(
+    llm=OpenAI(),
+    threshold=0.5,
+)
+
+result = chain.run("Generate some text")
+print(f"Validated: {result.get('validated', False)}")
+```
+
+### LlamaIndex Integration
+
+```python
+from llama_index import VectorStoreIndex
+from logoslabs.integrations.llamaindex import LogosLabsPostprocessor
+
+# Add quality filtering to query engine
+query_engine = index.as_query_engine(
+    node_postprocessors=[
+        LogosLabsPostprocessor(threshold=0.5, filter_failures=True)
+    ]
+)
+
+response = query_engine.query("What is...?")
+```
+
+### ZenML Integration
+
+```python
+from zenml import pipeline
+from logoslabs.integrations.zenml import logoslabs_filter_step
+
+@pipeline
+def validation_pipeline():
+    data = load_data()
+    filtered, summary = logoslabs_filter_step(data, threshold=0.5)
+    return filtered
+
+validation_pipeline().run()
+```
+
+**See [INTEGRATIONS.md](INTEGRATIONS.md) for detailed integration guides and examples.**
 
 ## Development
 

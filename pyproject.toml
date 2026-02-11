@@ -32,6 +32,20 @@ dev = [
     "pytest>=7.0.0",
     "pytest-cov>=4.0.0",
 ]
+langchain = [
+    "langchain>=0.0.200",
+]
+llamaindex = [
+    "llama-index>=0.9.0",
+]
+zenml = [
+    "zenml>=0.40.0",
+]
+all = [
+    "langchain>=0.0.200",
+    "llama-index>=0.9.0",
+    "zenml>=0.40.0",
+]
 
 [project.scripts]
 logoslabs = "logoslabs.cli:main"
