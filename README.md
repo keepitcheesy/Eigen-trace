@@ -1,6 +1,6 @@
-# LogosLabs
+# EigenTrace
 
-LogosLabs is a LogosLoss-based Adversarial Validation Pipeline (AVP) for pre-filtering LLM outputs. It provides deterministic, offline structural analysis of text using FFT spectral and phase parity metrics.
+Adversarial Validation Pipeline (AVP) for pre-filtering LLM outputs. It provides deterministic, offline structural analysis of text using FFT spectral and phase parity metrics.
 
 ## Features
 
