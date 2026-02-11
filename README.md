@@ -53,7 +53,7 @@ This repo includes a small example input file and debug helpers:
 
 - `outputs.jsonl` — sample input data (uses `prediction` and `truth`)
 - `debug_signal.py` — prints basic stats on the encoded signal to help explain zero/near‑zero scores
-- `scripts/escalate.py` — optional helper to filter results for escalation to GPT-4 or an external judge
+- `scripts/escalate.py` — optional helper to filter results for escalation to an external judge
 
 ### Example input format
 
