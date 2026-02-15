@@ -1,0 +1,11 @@
+# Core dependencies
+torch>=2.0.0
+numpy>=1.20.0
+
+# Benchmarking and utilities
+pyyaml>=6.0
+matplotlib>=3.5.0
+
+# Development and testing
+pytest>=7.0.0
+pytest-cov>=4.0.0

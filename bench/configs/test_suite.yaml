@@ -1,0 +1,46 @@
+# Minimal test configuration for quick validation
+# Format: 1 seed x 2 losses x 1 task
+
+# Random seeds for reproducibility
+seeds: [42]
+
+# Loss functions to compare
+losses:
+  - name: "logosloss"
+    params:
+      grace_coeff: 0.5
+      phase_weight: 0.1
+  - name: "mse"
+    params: {}
+
+# Tasks to evaluate
+tasks:
+  - name: "image_denoise"
+    params:
+      image_size: 16
+      noise_type: "gaussian"
+      noise_level: 0.1
+      num_samples: 10
+    model: "unet"
+    model_params:
+      base_channels: 8
+    training:
+      epochs: 3
+      batch_size: 4
+      learning_rate: 0.001
+
+# Compression tests
+compression:
+  quantization:
+    enabled: true
+    bits: [8]
+  pruning:
+    enabled: true
+    sparsity: [0.2]
+
+# Output configuration
+output:
+  results_dir: "results"
+  metrics_file: "metrics.jsonl"
+  summary_file: "summary.csv"
+  checkpoints_dir: "checkpoints"
