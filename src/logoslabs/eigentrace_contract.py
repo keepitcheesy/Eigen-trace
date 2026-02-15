@@ -56,14 +56,24 @@ class AnomalyDetector:
             else:
                 word_counts[word_lower] = [i]
         
-        # Flag excessive repetition
+        # Flag excessive repetition (but exclude very common words)
+        stop_words = {'the', 'a', 'an', 'and', 'or', 'but', 'in', 'on', 'at', 'to', 'for', 
+                      'of', 'with', 'is', 'are', 'was', 'were', 'be', 'been', 'being',
+                      'have', 'has', 'had', 'do', 'does', 'did', 'will', 'would', 'should',
+                      'could', 'may', 'might', 'must', 'can', 'that', 'this', 'these', 'those',
+                      'it', 'its', 'as', 'by', 'from'}
+        
         for word, positions in word_counts.items():
-            if len(positions) > max(3, len(words) * 0.15):
+            # Skip stopwords for repetition detection
+            if word in stop_words:
+                continue
+            # Flag if word appears > 3 times OR > 12% of words (adjusted threshold)
+            if len(positions) > 3 or (len(words) > 10 and len(positions) / len(words) > 0.12):
                 anomalies.append({
                     'kind': 'repetition',
                     'start': positions[0],
                     'end': positions[-1],
-                    'severity': min(1.0, len(positions) / (len(words) * 0.2)),
+                    'severity': min(1.0, len(positions) / max(4.0, len(words) * 0.15)),
                     'description': f'Word "{word}" repeated {len(positions)} times'
                 })
         
@@ -193,8 +203,31 @@ class EigentraceScore:
     def overall(self) -> float:
         """Overall score (0..1, higher is better)."""
         # Convert instability score to quality score (invert and normalize)
-        # Instability typically ranges 0-2+, convert to 0-1 quality score
-        quality = max(0.0, min(1.0, 1.0 - (self.instability_score / 2.0)))
+        # Use a continuous function for better granularity
+        # Lower instability = higher quality
+        
+        # Base quality from instability (sigmoid-like mapping)
+        if self.instability_score < 0.05:
+            base_quality = 0.90
+        elif self.instability_score < 0.10:
+            base_quality = 0.75
+        elif self.instability_score < 0.15:
+            base_quality = 0.60
+        elif self.instability_score < 0.25:
+            base_quality = 0.40
+        elif self.instability_score < 0.40:
+            base_quality = 0.20
+        else:
+            base_quality = 0.05
+        
+        # Apply anomaly penalty (each anomaly reduces quality)
+        anomaly_penalty = 0
+        for anomaly in self.anomalies:
+            severity = anomaly.get('severity', 0.5)
+            anomaly_penalty += severity * 0.15  # Each high-severity anomaly can reduce quality by up to 15%
+        
+        quality = max(0.0, base_quality - anomaly_penalty)
+        
         return quality
     
     @property
@@ -242,13 +275,32 @@ def score_text(
     if processor is None:
         processor = AVPProcessor()
     
-    # Use text as both pred and truth if no reference provided
+    # If no reference provided, use a simple "clean" baseline
+    # This helps detect quality issues
     if not reference:
-        reference = text
+        # Create a normalized reference by removing extreme repetition
+        # and creating a more stable signal
+        words = text.split()
+        if len(words) > 0:
+            # Remove consecutive duplicates
+            deduped = [words[0]]
+            for word in words[1:]:
+                if word.lower() != deduped[-1].lower():
+                    deduped.append(word)
+            reference = ' '.join(deduped)
+        else:
+            reference = text
     
     # Compute instability score
     instability = compute_instability_score(
         text, reference, processor.loss_fn, processor.max_length
     )
     
-    return EigentraceScore(text, reference, instability, processor)
+    # Detect anomalies and adjust score
+    anomalies = AnomalyDetector.detect_all_anomalies(text)
+    
+    # Boost instability based on anomaly severity
+    anomaly_boost = sum(a.get('severity', 0.5) for a in anomalies) * 0.1
+    adjusted_instability = instability + anomaly_boost
+    
+    return EigentraceScore(text, reference, adjusted_instability, processor)

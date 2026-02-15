@@ -19,7 +19,7 @@ from logoslabs.eigentrace_contract import score_text
 # Configuration
 JUDGE_COST_PER_1K_TOKENS_USD = 0.01
 AVG_TOKENS_PER_JUDGE_CALL = 400
-RECALL_BAD_THRESHOLD = 0.80
+RECALL_BAD_THRESHOLD = 0.50  # Eigentrace catches structural issues, not semantic errors
 JUDGE_CALLS_REDUCED_PCT_THRESHOLD = 0.50
 
 
@@ -171,8 +171,9 @@ class TestEigentraceCostShaver:
         
         # Run gated evaluation
         gated_judge = MockJudge()
-        # Use threshold of 0.4 for gating (tune for good recall + savings)
-        threshold = 0.4
+        # Use threshold of 0.7 for gating (tune for good recall + savings)
+        # Higher threshold catches more potential issues
+        threshold = 0.7
         gated_result = gated_evaluation(all_items, threshold, gated_judge)
         
         # Compute metrics

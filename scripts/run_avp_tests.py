@@ -50,7 +50,7 @@ def run_pytest() -> dict:
 def collect_metrics() -> dict:
     """Collect metrics from test artifacts."""
     metrics = {
-        'timestamp': datetime.utcnow().isoformat() + 'Z',
+        'timestamp': datetime.now().astimezone().isoformat(),
         'test_suite': 'AVP Test Suite',
         'use_cases': {},
         'fixtures': {},

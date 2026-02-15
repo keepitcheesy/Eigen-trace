@@ -70,3 +70,7 @@ tmp/
 # Generated output files
 results.jsonl
 escalate_queue.jsonl
+
+# AVP test reports (generated)
+reports/avp_report.json
+reports/avp_report.md
