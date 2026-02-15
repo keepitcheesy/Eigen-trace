@@ -20,7 +20,7 @@ suite:
 	python bench/run_suite.py --config bench/configs/suite.yaml
 
 inspect:
-	python inspect/run_inspection.py --results-dir results --inspect-dir results/inspect
+	python inspection/run_inspection.py --results-dir results --inspect-dir results/inspection
 
 report:
 	python reports/generate_report.py --results-dir results --output reports/report_latest.md

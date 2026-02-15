@@ -137,7 +137,7 @@
 - Metrics: `results/metrics.jsonl`
 - Summary: `results/summary.csv`
 - Checkpoints: `results/checkpoints/`
-- Inspection: `results/inspect/`
+- Inspection: `results/inspection/`
 
 ### Reproducibility
 - Configuration: `bench/configs/suite.yaml`
@@ -151,4 +151,4 @@
 
 ### Figures
 
-[Reference to plots in results/inspect/]
+[Reference to plots in results/inspection/]

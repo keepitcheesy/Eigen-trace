@@ -12,7 +12,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
 from losses import LogosLoss, MSELoss, HuberLoss
-from inspect import (
+from inspection import (
     analyze_residual_spectrum,
     compute_frequency_attribution,
     analyze_gradient_spectrum,

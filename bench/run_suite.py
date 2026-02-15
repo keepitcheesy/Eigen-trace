@@ -191,8 +191,8 @@ class BenchmarkRunner:
     
     def apply_quantization(self, model: nn.Module, bits: int) -> nn.Module:
         """Simulate quantization by quantizing weights."""
-        quantized_model = type(model)(**model.__dict__.get('init_params', {}))
-        quantized_model.load_state_dict(model.state_dict())
+        import copy
+        quantized_model = copy.deepcopy(model)
         
         # Simple quantization simulation: quantize to N bits
         for param in quantized_model.parameters():
@@ -208,8 +208,8 @@ class BenchmarkRunner:
     
     def apply_pruning(self, model: nn.Module, sparsity: float) -> nn.Module:
         """Apply magnitude-based pruning."""
-        pruned_model = type(model)(**model.__dict__.get('init_params', {}))
-        pruned_model.load_state_dict(model.state_dict())
+        import copy
+        pruned_model = copy.deepcopy(model)
         
         for name, param in pruned_model.named_parameters():
             if 'weight' in name and param.requires_grad:

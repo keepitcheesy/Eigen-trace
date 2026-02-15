@@ -381,6 +381,65 @@ validation_pipeline().run()
 
 **See [INTEGRATIONS.md](INTEGRATIONS.md) for detailed integration guides and examples.**
 
+## Benchmark Harness
+
+A comprehensive benchmark harness is provided to evaluate LogosLoss performance against baseline losses across multiple tasks.
+
+### Quick Start
+
+```bash
+# Install dependencies
+make install
+
+# Run full benchmark suite
+make all
+```
+
+This will:
+1. Train models with LogosLoss, MSE, and Huber losses
+2. Evaluate on image denoising and time series tasks
+3. Test compression robustness (quantization, pruning)
+4. Run inspection tools (spectral analysis, gradient analysis)
+5. Generate a comprehensive report
+
+### Benchmark Features
+
+- **Multiple Loss Functions**: LogosLoss, MSE, Huber
+- **Tasks**: Image denoising, time series forecasting
+- **Models**: U-Net, LSTM, MLP
+- **Compression Tests**: Quantization (8-bit), Pruning (20%, 40%)
+- **Inspection Tools**:
+  - Residual spectrum analysis
+  - Per-frequency penalty attribution
+  - Gradient spectrum comparison
+- **Reproducibility**: Deterministic seeding, config snapshots
+- **Artifacts**: Metrics (JSONL), summaries (CSV), checkpoints, plots
+
+See [bench/README.md](bench/README.md) for detailed documentation.
+
+### Configuration
+
+Edit `bench/configs/suite.yaml` to customize:
+- Random seeds
+- Loss function parameters
+- Task configurations
+- Training hyperparameters
+- Compression settings
+
+### Output Structure
+
+```
+results/
+├── metrics.jsonl           # Per-run detailed metrics
+├── summary.csv             # Summary table
+├── checkpoints/            # Trained model weights
+├── inspection/             # Analysis plots and summaries
+└── reproducibility.json    # Environment info
+
+reports/
+└── report_latest.md        # Auto-generated report
+```
+
 ## Development
 
 ### Running Tests

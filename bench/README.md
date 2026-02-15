@@ -136,7 +136,7 @@ Analyzes gradient frequency content during training.
 - Gradient entropy (diversity measure)
 
 All inspection results include:
-- Plots saved to `results/inspect/`
+- Plots saved to `results/inspection/`
 - JSON summaries with numeric statistics
 
 ## Output Files
@@ -165,7 +165,7 @@ Each checkpoint contains:
 - `model_state_dict`: Trained weights
 - `config`: Full experiment configuration
 
-### results/inspect/
+### results/inspection/
 Inspection outputs:
 - `residual_spectrum_{loss}.png`
 - `frequency_attribution.png` (LogosLoss only)

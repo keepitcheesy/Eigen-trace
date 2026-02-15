@@ -201,7 +201,7 @@ def generate_report(results_dir: Path, output_path: Path) -> None:
         lines.append("")
     
     # Inspection findings
-    inspect_dir = results_dir / "inspect"
+    inspect_dir = results_dir / "inspection"
     lines.append("## Inspection Findings")
     lines.append("")
     
@@ -269,7 +269,7 @@ def generate_report(results_dir: Path, output_path: Path) -> None:
     lines.append("- Metrics: `results/metrics.jsonl`")
     lines.append("- Summary: `results/summary.csv`")
     lines.append("- Checkpoints: `results/checkpoints/`")
-    lines.append("- Inspection: `results/inspect/`")
+    lines.append("- Inspection: `results/inspection/`")
     lines.append("")
     
     lines.append("### Reproducibility")
