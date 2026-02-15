@@ -100,6 +100,7 @@ class BenchmarkRunner:
         loss_fn: nn.Module,
         train_data: tuple,
         config: Dict[str, Any],
+        task_name: str = None,
     ) -> Dict[str, Any]:
         """
         Train model and return metrics.
@@ -114,6 +115,8 @@ class BenchmarkRunner:
             (inputs, targets) tensors
         config : dict
             Training configuration
+        task_name : str, optional
+            Name of the task (to handle task-specific logic)
             
         Returns
         -------
@@ -148,6 +151,11 @@ class BenchmarkRunner:
                     
                     optimizer.zero_grad()
                     outputs = model(batch_inputs)
+                    
+                    # For time series, only use the forecast horizon portion
+                    if task_name == "time_series" and outputs.shape[-1] != batch_targets.shape[-1]:
+                        outputs = outputs[:, :, -batch_targets.shape[-1]:]
+                    
                     loss = loss_fn(outputs, batch_targets)
                     loss.backward()
                     optimizer.step()
@@ -174,6 +182,7 @@ class BenchmarkRunner:
         model: nn.Module,
         test_data: tuple,
         task: Any,
+        task_name: str = None,
     ) -> Dict[str, float]:
         """Evaluate model on test data."""
         model.eval()
@@ -183,6 +192,10 @@ class BenchmarkRunner:
         
         with torch.no_grad():
             outputs = model(inputs)
+            
+            # For time series, only use the forecast horizon portion
+            if task_name == "time_series" and outputs.shape[-1] != targets.shape[-1]:
+                outputs = outputs[:, :, -targets.shape[-1]:]
         
         # Compute task-specific metrics
         metrics = task.compute_metrics(outputs, targets)
@@ -233,6 +246,7 @@ class BenchmarkRunner:
         test_data: tuple,
         task: Any,
         baseline_metrics: Dict[str, float],
+        task_name: str = None,
     ) -> List[Dict[str, Any]]:
         """Run compression tests (quantization and pruning)."""
         compression_results = []
@@ -242,7 +256,7 @@ class BenchmarkRunner:
             for bits in self.config['compression']['quantization']['bits']:
                 print(f"    Testing {bits}-bit quantization...")
                 quantized = self.apply_quantization(model, bits)
-                metrics = self.evaluate_model(quantized, test_data, task)
+                metrics = self.evaluate_model(quantized, test_data, task, task_name)
                 
                 compression_results.append({
                     "type": "quantization",
@@ -257,7 +271,7 @@ class BenchmarkRunner:
             for sparsity in self.config['compression']['pruning']['sparsity']:
                 print(f"    Testing {sparsity*100:.0f}% pruning...")
                 pruned = self.apply_pruning(model, sparsity)
-                metrics = self.evaluate_model(pruned, test_data, task)
+                metrics = self.evaluate_model(pruned, test_data, task, task_name)
                 
                 compression_results.append({
                     "type": "pruning",
@@ -295,11 +309,11 @@ class BenchmarkRunner:
         
         # Train model
         training_metrics = self.train_model(
-            model, loss_fn, train_data, task_config['training']
+            model, loss_fn, train_data, task_config['training'], task_config['name']
         )
         
         # Evaluate
-        eval_metrics = self.evaluate_model(model, test_data, task)
+        eval_metrics = self.evaluate_model(model, test_data, task, task_config['name'])
         
         # Energy estimate
         energy_info = estimate_energy(
@@ -310,7 +324,7 @@ class BenchmarkRunner:
         
         # Compression tests
         compression_results = self.run_compression_tests(
-            model, test_data, task, eval_metrics
+            model, test_data, task, eval_metrics, task_config['name']
         )
         
         # Save checkpoint
@@ -408,10 +422,15 @@ class BenchmarkRunner:
                 row[f"metric_{key}"] = val
             rows.append(row)
         
-        # Write CSV
+        # Write CSV - collect all unique field names first
         if rows:
+            all_fieldnames = set()
+            for row in rows:
+                all_fieldnames.update(row.keys())
+            fieldnames = sorted(all_fieldnames)
+            
             with open(self.summary_file, 'w', newline='') as f:
-                writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+                writer = csv.DictWriter(f, fieldnames=fieldnames, extrasaction='ignore')
                 writer.writeheader()
                 writer.writerows(rows)
 

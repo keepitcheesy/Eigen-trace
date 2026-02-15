@@ -33,7 +33,7 @@ def main():
     parser.add_argument(
         "--inspect-dir",
         type=str,
-        default="results/inspect",
+        default="results/inspection",
         help="Directory to save inspection results"
     )
     
