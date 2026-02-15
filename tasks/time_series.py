@@ -101,7 +101,8 @@ class TimeSeriesForecastTask:
                 signal += amp * torch.sin(2 * np.pi * freq * t + phase)
         
         # Add trend (optional)
-        if np.random.rand() < 0.3:
+        trend_probability = 0.3  # Probability of adding a linear trend
+        if np.random.rand() < trend_probability:
             trend_coef = np.random.uniform(-0.5, 0.5)
             signal += trend_coef * t
         

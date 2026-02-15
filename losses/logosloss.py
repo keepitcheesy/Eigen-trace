@@ -144,6 +144,7 @@ class LogosLoss(nn.Module):
         presence_w = presence_w / presence_w.sum(dim=-1, keepdim=True).clamp_min(self.eps)
 
         # Weight by frequency (emphasize higher frequencies if freq_power > 1)
+        # freq ranges from 0.0 (DC) to 1.0 (Nyquist frequency)
         freq = torch.linspace(0.0, 1.0, F, device=device, dtype=dtype)
         freq_w = (freq ** self.freq_power).view(1, 1, F)
         freq_w = freq_w / freq_w.sum(dim=-1, keepdim=True).clamp_min(self.eps)

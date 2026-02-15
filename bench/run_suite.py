@@ -190,7 +190,14 @@ class BenchmarkRunner:
         return metrics
     
     def apply_quantization(self, model: nn.Module, bits: int) -> nn.Module:
-        """Simulate quantization by quantizing weights."""
+        """
+        Simulate quantization by quantizing weights.
+        
+        NOTE: This is a simulation of uniform quantization and may not accurately
+        represent actual hardware quantization behavior, especially for specialized
+        accelerators or optimized 8-bit inference engines. For production use cases,
+        consider using PyTorch's quantization APIs or framework-specific tools.
+        """
         import copy
         quantized_model = copy.deepcopy(model)
         

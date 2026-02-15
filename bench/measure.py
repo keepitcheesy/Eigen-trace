@@ -42,7 +42,10 @@ def measure_flops(
     Estimate FLOPs for a model.
     
     This is a simple estimation based on layer parameters.
-    For more accurate measurements, use specialized tools like fvcore or ptflops.
+    NOTE: This is a very rough approximation. For accurate FLOPs measurements,
+    use specialized tools like fvcore (from Facebook Research) or ptflops.
+    The formula used here (2 * params) assumes one multiply and one add per param
+    but does not account for specific operation types, activations, or architecture details.
     
     Parameters
     ----------

@@ -195,6 +195,11 @@ To reproduce results:
 make suite  # Uses seeds from config
 ```
 
+**Note**: For exact reproducibility, use the same PyTorch and NumPy versions
+as documented in `results/reproducibility.json`. Different versions may produce
+slightly different numerical results due to implementation changes in underlying
+operations.
+
 ## Customization
 
 ### Add a New Loss
