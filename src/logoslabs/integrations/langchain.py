@@ -48,8 +48,8 @@ if LANGCHAIN_AVAILABLE:
         Args:
             threshold: Instability score threshold (default: 1.0)
             reference_text: Optional reference text for comparison
-            grace_coeff: LogosLoss spectral weight (default: 0.5)
-            phase_weight: LogosLoss phase weight (default: 0.1)
+            grace_coeff: LogosLoss spectral weight (default: 0.1)
+            phase_weight: LogosLoss phase weight (default: 0.01)
             raise_on_fail: Raise exception if output fails threshold (default: False)
         """
         
@@ -57,8 +57,8 @@ if LANGCHAIN_AVAILABLE:
             self,
             threshold: float = 1.0,
             reference_text: Optional[str] = None,
-            grace_coeff: float = 0.5,
-            phase_weight: float = 0.1,
+            grace_coeff: float = 0.1,
+            phase_weight: float = 0.01,
             raise_on_fail: bool = False,
         ):
             super().__init__()
@@ -133,15 +133,15 @@ if LANGCHAIN_AVAILABLE:
         
         threshold: float = 1.0
         reference_text: Optional[str] = None
-        grace_coeff: float = 0.5
-        phase_weight: float = 0.1
+        grace_coeff: float = 0.1
+        phase_weight: float = 0.01
         
         def __init__(self, **kwargs):
             super().__init__(**kwargs)
             self.processor = AVPProcessor(
                 threshold=kwargs.get("threshold", 1.0),
-                grace_coeff=kwargs.get("grace_coeff", 0.5),
-                phase_weight=kwargs.get("phase_weight", 0.1),
+                grace_coeff=kwargs.get("grace_coeff", 0.1),
+                phase_weight=kwargs.get("phase_weight", 0.01),
                 deterministic=True,
             )
         
@@ -152,8 +152,8 @@ if LANGCHAIN_AVAILABLE:
             prompt: Optional[BasePromptTemplate] = None,
             threshold: float = 1.0,
             reference_text: Optional[str] = None,
-            grace_coeff: float = 0.5,
-            phase_weight: float = 0.1,
+            grace_coeff: float = 0.1,
+            phase_weight: float = 0.01,
             **kwargs
         ) -> "LogosLabsChain":
             """

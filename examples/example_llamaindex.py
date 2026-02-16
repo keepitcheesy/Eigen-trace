@@ -98,7 +98,7 @@ def example_custom_pipeline():
             LogosLabsPostprocessor(
                 threshold=0.5,
                 grace_coeff=0.5,
-                phase_weight=0.1,
+                phase_weight=0.01,
                 filter_failures=True
             )
         ],
