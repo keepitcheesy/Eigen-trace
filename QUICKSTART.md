@@ -226,8 +226,8 @@ Start with the default (1.0) and adjust based on your use case.
 # Fine-tune LogosLoss behavior
 processor = AVPProcessor(
     threshold=0.5,
-    grace_coeff=0.5,      # Spectral component weight
-    phase_weight=0.1,     # Phase component weight
+    grace_coeff=0.1,      # Spectral component weight
+    phase_weight=0.01,     # Phase component weight
     max_length=512,       # Maximum text length
     deterministic=True,   # Reproducible results
 )

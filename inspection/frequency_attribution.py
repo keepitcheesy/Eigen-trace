@@ -17,8 +17,8 @@ import matplotlib.pyplot as plt
 def compute_frequency_attribution(
     pred: torch.Tensor,
     truth: torch.Tensor,
-    grace_coeff: float = 0.5,
-    phase_weight: float = 0.1,
+    grace_coeff: float = 0.1,
+    phase_weight: float = 0.01,
     output_dir: Path = None,
 ) -> Dict[str, Any]:
     """

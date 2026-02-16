@@ -55,8 +55,8 @@ if LLAMAINDEX_AVAILABLE:
         Args:
             threshold: Instability score threshold (default: 1.0)
             reference_text: Optional reference text for comparison
-            grace_coeff: LogosLoss spectral weight (default: 0.5)
-            phase_weight: LogosLoss phase weight (default: 0.1)
+            grace_coeff: LogosLoss spectral weight (default: 0.1)
+            phase_weight: LogosLoss phase weight (default: 0.01)
             filter_failures: Remove nodes that fail threshold (default: False)
         """
         
@@ -64,8 +64,8 @@ if LLAMAINDEX_AVAILABLE:
             self,
             threshold: float = 1.0,
             reference_text: Optional[str] = None,
-            grace_coeff: float = 0.5,
-            phase_weight: float = 0.1,
+            grace_coeff: float = 0.1,
+            phase_weight: float = 0.01,
             filter_failures: bool = False,
         ):
             super().__init__()
@@ -139,8 +139,8 @@ if LLAMAINDEX_AVAILABLE:
         def __init__(
             self,
             threshold: float = 1.0,
-            grace_coeff: float = 0.5,
-            phase_weight: float = 0.1,
+            grace_coeff: float = 0.1,
+            phase_weight: float = 0.01,
         ):
             self.processor = AVPProcessor(
                 threshold=threshold,

@@ -33,8 +33,8 @@ def example_basic_step():
         filtered_data, summary = logoslabs_filter_step(
             items=data,
             threshold=0.5,
-            grace_coeff=0.5,
-            phase_weight=0.1
+            grace_coeff=0.1,
+            phase_weight=0.01
         )
         
         # Continue pipeline with filtered data

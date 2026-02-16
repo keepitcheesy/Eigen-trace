@@ -138,11 +138,20 @@ class BenchmarkRunner:
         
         history = []
         
+        # Check if this is LogosLoss for telemetry
+        is_logosloss = hasattr(loss_fn, 'grace_coeff') and hasattr(loss_fn, 'phase_weight')
+        
         with measure_time() as timer:
             model.train()
             for epoch in range(epochs):
                 epoch_loss = 0.0
                 num_batches = 0
+                
+                # For telemetry tracking
+                if is_logosloss:
+                    epoch_material_sum = 0.0
+                    epoch_spectral_sum = 0.0
+                    epoch_phase_sum = 0.0
                 
                 # Simple batching
                 for i in range(0, len(inputs), batch_size):
@@ -156,6 +165,44 @@ class BenchmarkRunner:
                     if task_name == "time_series" and outputs.shape[-1] != batch_targets.shape[-1]:
                         outputs = outputs[:, :, -batch_targets.shape[-1]:]
                     
+                    # Compute loss components for telemetry if LogosLoss
+                    if is_logosloss:
+                        # Manually compute components for telemetry
+                        # (directly accessing loss_fn internals for efficiency)
+                        with torch.no_grad():
+                            # Material (time-domain MSE)
+                            material = loss_fn.mse(outputs, batch_targets).mean(dim=-1)
+                            
+                            # FFT
+                            pred_f = torch.fft.rfft(outputs, dim=-1, norm='ortho')
+                            truth_f = torch.fft.rfft(batch_targets, dim=-1, norm='ortho')
+                            F = pred_f.shape[-1]
+                            
+                            truth_mag = torch.abs(truth_f).clamp_min(1e-5)
+                            pred_mag = torch.abs(pred_f).clamp_min(1e-5)
+                            
+                            # Spectral
+                            log_diff = (torch.log(pred_mag) - torch.log(truth_mag)) ** 2
+                            w_presence = truth_mag ** loss_fn.presence_power
+                            freq = torch.linspace(0.0, 1.0, F, device=outputs.device, dtype=outputs.dtype)
+                            w_freq = (freq ** loss_fn.freq_power).view(1, 1, F)
+                            weights = w_presence * w_freq
+                            weights = weights / weights.sum(dim=-1, keepdim=True).clamp_min(loss_fn.eps)
+                            spectral = (log_diff * weights).sum(dim=-1)
+                            
+                            # Phase
+                            interaction = pred_f * torch.conj(truth_f)
+                            angle = torch.angle(interaction)
+                            phase_err = 1.0 - torch.cos(angle)
+                            mercy = truth_mag ** loss_fn.mercy_power
+                            mercy = mercy / mercy.sum(dim=-1, keepdim=True).clamp_min(loss_fn.eps)
+                            phase = (phase_err * mercy).sum(dim=-1)
+                            
+                            # Accumulate component values
+                            epoch_material_sum += material.mean().item()
+                            epoch_spectral_sum += spectral.mean().item()
+                            epoch_phase_sum += phase.mean().item()
+                    
                     loss = loss_fn(outputs, batch_targets)
                     loss.backward()
                     optimizer.step()
@@ -166,7 +213,15 @@ class BenchmarkRunner:
                 avg_loss = epoch_loss / num_batches
                 history.append(avg_loss)
                 
-                if (epoch + 1) % 5 == 0:
+                # Print telemetry for LogosLoss (every epoch for component tracking)
+                # For other losses, print every 5 epochs to reduce output
+                if is_logosloss:
+                    mat_val = epoch_material_sum / num_batches
+                    spec_val = (loss_fn.grace_coeff * epoch_spectral_sum) / num_batches
+                    phase_val = (loss_fn.phase_weight * epoch_phase_sum) / num_batches
+                    print(f"  Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.6f}, "
+                          f"Material: {mat_val:.6f}, Spectral: {spec_val:.6f}, Phase: {phase_val:.6f}")
+                elif (epoch + 1) % 5 == 0:
                     print(f"  Epoch {epoch+1}/{epochs}, Loss: {avg_loss:.6f}")
         
         training_time = timer['elapsed']

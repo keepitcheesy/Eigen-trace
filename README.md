@@ -206,8 +206,8 @@ from logoslabs.avp import AVPProcessor
 # Initialize processor
 processor = AVPProcessor(
     threshold=1.0,
-    grace_coeff=0.5,
-    phase_weight=0.1,
+    grace_coeff=0.1,
+    phase_weight=0.01,
 )
 
 # Process items
@@ -229,8 +229,8 @@ from logoslabs import LogosLossV4
 
 # Initialize loss function
 loss_fn = LogosLossV4(
-    grace_coeff=0.5,
-    phase_weight=0.1,
+    grace_coeff=0.1,
+    phase_weight=0.01,
 )
 
 # Compute loss
@@ -503,8 +503,8 @@ total = material + (grace_coeff × spectral) + (phase_weight × phase)
 
 ### Parameters
 
-- `grace_coeff` (default: 0.5): Weight for spectral component
-- `phase_weight` (default: 0.1): Weight for phase component
+- `grace_coeff` (default: 0.1): Weight for spectral component
+- `phase_weight` (default: 0.01): Weight for phase component
 - `eps` (default: 1e-8): Numerical stability epsilon
 - `freq_power` (default: 1.0): Frequency weighting power
 - `mercy_power` (default: 1.0): Phase error weighting power (focuses on dominant bins)

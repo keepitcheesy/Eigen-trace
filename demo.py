@@ -25,8 +25,8 @@ def demo_logosloss():
     
     # Initialize loss function
     loss_fn = LogosLossV4(
-        grace_coeff=0.5,
-        phase_weight=0.1,
+        grace_coeff=0.1,
+        phase_weight=0.01,
         reduction="mean"
     )
     
@@ -59,8 +59,8 @@ def demo_avp_processor():
     # Initialize processor
     processor = AVPProcessor(
         threshold=1.0,
-        grace_coeff=0.5,
-        phase_weight=0.1,
+        grace_coeff=0.1,
+        phase_weight=0.01,
         deterministic=True
     )
     

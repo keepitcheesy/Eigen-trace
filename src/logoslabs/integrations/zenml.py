@@ -82,7 +82,7 @@ if ZENML_AVAILABLE:
         Example:
             filter_step = LogosLabsFilterStep(
                 threshold=0.8,
-                grace_coeff=0.5
+                grace_coeff=0.1
             )
             filtered_data = filter_step(input_data)
         """
@@ -90,8 +90,8 @@ if ZENML_AVAILABLE:
         def __init__(
             self,
             threshold: float = 1.0,
-            grace_coeff: float = 0.5,
-            phase_weight: float = 0.1,
+            grace_coeff: float = 0.1,
+            phase_weight: float = 0.01,
             **kwargs
         ):
             super().__init__(**kwargs)
@@ -153,8 +153,8 @@ if ZENML_AVAILABLE:
     def logoslabs_score_step(
         items: List[Dict[str, Any]],
         threshold: float = 1.0,
-        grace_coeff: float = 0.5,
-        phase_weight: float = 0.1,
+        grace_coeff: float = 0.1,
+        phase_weight: float = 0.01,
     ) -> Output(scored_items=List[Dict[str, Any]], summary=Dict[str, Any]):
         """
         ZenML step for scoring items without filtering.
