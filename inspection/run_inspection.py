@@ -76,7 +76,7 @@ def main():
         
         # Create loss function
         if loss_name == "logosloss":
-            loss_fn = LogosLoss(grace_coeff=0.5, phase_weight=0.1)
+            loss_fn = LogosLoss(grace_coeff=0.1, phase_weight=0.01)
         elif loss_name == "mse":
             loss_fn = MSELoss()
         elif loss_name == "huber":
@@ -96,7 +96,7 @@ def main():
             print("  Computing frequency attribution...")
             compute_frequency_attribution(
                 pred.clone(), truth.clone(),
-                grace_coeff=0.5, phase_weight=0.1,
+                grace_coeff=0.1, phase_weight=0.01,
                 output_dir=inspect_dir
             )
         

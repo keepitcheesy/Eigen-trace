@@ -92,8 +92,8 @@ class AVPProcessor:
     def __init__(
         self,
         threshold: float = 1.0,
-        grace_coeff: float = 0.5,
-        phase_weight: float = 0.1,
+        grace_coeff: float = 0.1,
+        phase_weight: float = 0.01,
         max_length: int = 512,
         structural_only: bool = True,
         deterministic: bool = True,

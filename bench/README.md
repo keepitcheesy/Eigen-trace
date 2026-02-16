@@ -78,8 +78,8 @@ Multi-component loss combining:
 - **Spectral noise**: Wrap-safe phase error
 
 Parameters:
-- `grace_coeff` (default: 0.5): Spectral weight
-- `phase_weight` (default: 0.1): Phase weight
+- `grace_coeff` (default: 0.1): Spectral weight
+- `phase_weight` (default: 0.01): Phase weight
 - `freq_power` (default: 1.0): Frequency emphasis
 - `mercy_power` (default: 1.0): Phase weighting
 - `presence_power` (default: 1.0): Spectral energy weighting

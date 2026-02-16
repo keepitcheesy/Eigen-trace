@@ -21,8 +21,8 @@ class TestNumericalParity:
         our_loss = LogosLossV4()
         
         # They should have identical parameters
-        assert ref_loss.grace_coeff == our_loss.grace_coeff == 0.5
-        assert ref_loss.phase_weight == our_loss.phase_weight == 0.1
+        assert ref_loss.grace_coeff == our_loss.grace_coeff == 0.1
+        assert ref_loss.phase_weight == our_loss.phase_weight == 0.01
         assert ref_loss.eps == our_loss.eps == 1e-8
         assert ref_loss.freq_power == our_loss.freq_power == 1.0
         assert ref_loss.mercy_power == our_loss.mercy_power == 1.0
@@ -35,8 +35,8 @@ class TestNumericalParity:
         
         # Create two instances with same config
         loss1 = LogosLossV4(
-            grace_coeff=0.5,
-            phase_weight=0.1,
+            grace_coeff=0.1,
+            phase_weight=0.01,
             eps=1e-8,
             freq_power=1.0,
             mercy_power=1.0,
@@ -45,8 +45,8 @@ class TestNumericalParity:
         )
         
         loss2 = LogosLossV4(
-            grace_coeff=0.5,
-            phase_weight=0.1,
+            grace_coeff=0.1,
+            phase_weight=0.01,
             eps=1e-8,
             freq_power=1.0,
             mercy_power=1.0,

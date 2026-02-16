@@ -17,8 +17,8 @@ class TestLogosLossV4:
     def test_initialization(self):
         """Test that LogosLossV4 initializes with correct parameters."""
         loss = LogosLossV4()
-        assert loss.grace_coeff == 0.5
-        assert loss.phase_weight == 0.1
+        assert loss.grace_coeff == 0.1
+        assert loss.phase_weight == 0.01
         assert loss.eps == 1e-8
         assert loss.freq_power == 1.0
         assert loss.mercy_power == 1.0
@@ -55,7 +55,7 @@ class TestLogosLossV4:
         pred = torch.randn(2, 3, 100)
         truth = torch.randn(2, 3, 50)
         
-        with pytest.raises(ValueError, match="pred and truth must match shape"):
+        with pytest.raises(ValueError, match="Shape mismatch"):
             loss(pred, truth)
             
     def test_forward_mean_reduction(self):
