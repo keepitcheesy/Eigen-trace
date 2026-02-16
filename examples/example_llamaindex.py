@@ -97,7 +97,7 @@ def example_custom_pipeline():
             SimilarityPostprocessor(similarity_cutoff=0.7),
             LogosLabsPostprocessor(
                 threshold=0.5,
-                grace_coeff=0.5,
+                grace_coeff=0.1,
                 phase_weight=0.01,
                 filter_failures=True
             )
