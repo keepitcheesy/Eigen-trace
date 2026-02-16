@@ -167,12 +167,9 @@ class BenchmarkRunner:
                     
                     # Compute loss components for telemetry if LogosLoss
                     if is_logosloss:
-                        # Compute components separately for telemetry
+                        # Manually compute components for telemetry
+                        # (directly accessing loss_fn internals for efficiency)
                         with torch.no_grad():
-                            # Get components by calling forward with reduction='none'
-                            orig_reduction = loss_fn.reduction
-                            loss_fn.reduction = 'none'
-                            
                             # Material (time-domain MSE)
                             material = loss_fn.mse(outputs, batch_targets).mean(dim=-1)
                             
@@ -201,9 +198,6 @@ class BenchmarkRunner:
                             mercy = mercy / mercy.sum(dim=-1, keepdim=True).clamp_min(loss_fn.eps)
                             phase = (phase_err * mercy).sum(dim=-1)
                             
-                            # Restore reduction
-                            loss_fn.reduction = orig_reduction
-                            
                             # Accumulate component values
                             epoch_material_sum += material.mean().item()
                             epoch_spectral_sum += spectral.mean().item()
@@ -219,7 +213,8 @@ class BenchmarkRunner:
                 avg_loss = epoch_loss / num_batches
                 history.append(avg_loss)
                 
-                # Print telemetry for LogosLoss
+                # Print telemetry for LogosLoss (every epoch for component tracking)
+                # For other losses, print every 5 epochs to reduce output
                 if is_logosloss:
                     mat_val = epoch_material_sum / num_batches
                     spec_val = (loss_fn.grace_coeff * epoch_spectral_sum) / num_batches
